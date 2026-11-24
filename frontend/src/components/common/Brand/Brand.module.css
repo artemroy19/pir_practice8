@@ -1,0 +1,13 @@
+.brand {
+  display: inline-block;
+  flex-shrink: 0;
+  color: var(--primary);
+  font-family: inherit;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  white-space: nowrap;
+}
+
+.large { font-size: 38px; }

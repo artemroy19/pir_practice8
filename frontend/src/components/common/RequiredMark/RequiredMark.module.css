@@ -1,0 +1,9 @@
+.mark { color: #7345b4; }
+.fields :is(input, select, textarea)[required] {
+  --border: #bda3e6;
+  border-color: var(--border);
+}
+.fields :is(input, select, textarea)[aria-invalid="true"] {
+  --border: #c23636;
+  border-color: var(--border);
+}

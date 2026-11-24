@@ -1,0 +1,166 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  z-index: 1000;
+  overflow-y: auto;
+  padding: 32px 16px;
+}
+
+.modalContent {
+  background: var(--surface);
+  border-radius: var(--radius);
+  width: min(100%, 920px);
+  max-width: 920px;
+  max-height: calc(100vh - 64px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: var(--surface-shadow);
+}
+
+.modalContentSmall {
+  width: min(100%, 460px);
+  max-width: 460px;
+}
+
+.modalContentMedium {
+  width: min(100%, 680px);
+  max-width: 680px;
+}
+
+.modalContentWide {
+  width: min(100%, 800px);
+  max-width: 800px;
+}
+
+:global(html):has(.lockScroll) {
+  overflow: hidden;
+  scrollbar-gutter: stable;
+}
+
+.lockScroll,
+.lockScroll .modalBody {
+  overscroll-behavior: contain;
+}
+
+.lockScroll .modalTitle {
+  font-size: 23px;
+}
+
+.lockScroll .modalFooter > button {
+  font-size: 16px;
+}
+
+.modalContentMedium .closeButton,
+.modalContent[aria-modal="true"] .closeButton {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+}
+
+.modalContentMedium .modalFooter > button,
+.modalContent[aria-modal="true"] .modalFooter > button {
+  min-height: 46px;
+}
+
+.modalHeader {
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--surface);
+}
+
+.lavenderHeader {
+  background: #f3eeff;
+  border-bottom-color: #e7dcfa;
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-strong);
+  line-height: 1.3;
+}
+
+.modalDescription {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.closeButton {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #f5f3ff;
+  border: 1px solid var(--border);
+  font-size: 22px;
+  display: grid;
+  place-items: center;
+  color: var(--text);
+}
+
+.modalBody {
+  padding: 20px 24px;
+  overflow-y: auto;
+  flex: 1;
+  display: grid;
+  gap: 16px;
+}
+
+.modalFooter {
+  padding: 16px 24px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
+  background: var(--surface);
+}
+
+@media (max-width: 640px) {
+  .modalOverlay {
+    padding: 12px;
+  }
+
+  .modalContent {
+    max-height: calc(100vh - 24px);
+    border-radius: 20px;
+  }
+
+  .modalHeader,
+  .modalBody,
+  .modalFooter {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .modalFooter {
+    flex-direction: column-reverse;
+  }
+
+  .modalFooter > * {
+    width: 100%;
+  }
+}
+
+.modalContentDetail { max-width: 640px; }
+.eyebrow { margin: 0 0 8px; color: #6d28d9; font-size: 14px; font-weight: 600; }
+.modalContentDetail h2 { overflow-wrap: anywhere; padding-right: 8px; }

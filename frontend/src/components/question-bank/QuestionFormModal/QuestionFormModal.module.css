@@ -1,0 +1,286 @@
+.grid,
+.metadata,
+.targetOptions {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.metadata {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 128px);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  font-size: 16px;
+}
+
+.field > span,
+.targets legend {
+  font-weight: 500;
+  color: #374151;
+}
+
+.target,
+.inlineRow label {
+  font-size: 16px;
+}
+
+.field small,
+.target small {
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.field input,
+.field textarea,
+.field select,
+.inlineRow input[type="text"] {
+  min-height: 44px;
+  min-width: 0;
+  padding: 10px 12px;
+  font-size: 16px;
+}
+
+.field textarea {
+  min-height: 84px;
+  max-height: 45vh;
+}
+
+.field select {
+  padding-right: 36px;
+}
+
+.section {
+  margin: 0;
+  min-width: 0;
+  padding: 12px 16px 16px;
+  border-radius: 16px;
+  background: #faf9fe;
+  border: 1px solid #e9e6f5;
+}
+
+.section legend {
+  padding: 0 4px;
+  font-weight: 600;
+  font-size: 16px;
+  color: #1f2937;
+}
+
+.section .hint {
+  margin-bottom: 8px;
+}
+
+.inlineRow {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.answerRow {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.inlineRow label,
+.target {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.inlineRow button {
+  min-height: 44px;
+  padding: 8px 12px;
+}
+
+.targets {
+  padding: 0;
+  margin: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.targets legend {
+  padding: 0;
+  margin-bottom: 6px;
+  font-size: 16px;
+}
+
+.targetOptions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.target {
+  align-items: flex-start;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  color: #374151;
+}
+
+.targets .target:has(input:checked) {
+  border-color: var(--primary);
+  background: #faf9fe;
+}
+
+.target small {
+  display: block;
+  margin-top: 2px;
+}
+
+.details {
+  border-top: 1px solid var(--border);
+}
+
+.details summary {
+  padding: 12px 0;
+  cursor: pointer;
+  min-height: 44px;
+  color: var(--primary);
+  font-size: 16px;
+}
+
+.apiError {
+  font-size: 16px;
+}
+
+.hint,
+.closeMessage {
+  margin: 0;
+  color: var(--muted);
+  font-size: 16px;
+}
+
+.announcement {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .metadata,
+  .targetOptions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .section {
+    padding: 12px;
+  }
+
+  .inlineRow {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .answerRow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .inlineRow button {
+    grid-column: -2 / -1;
+    justify-self: end;
+  }
+}
+
+.generationRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.fieldLabel {
+  font-weight: 500;
+  color: #374151;
+}
+
+.asterisk {
+  color: #7345b4;
+}
+
+.field :is(input, select, textarea)[required],
+.inlineRow input[required],
+.targets .target,
+.section {
+  --border: #bda3e6;
+  border-color: var(--border);
+}
+
+.field :is(input, select, textarea)[aria-invalid="true"],
+.inlineRow input[aria-invalid="true"],
+.section[aria-invalid="true"] {
+  --border: #c23636;
+  --primary: #c23636;
+  border-color: var(--border);
+}
+
+.field :is(input, select, textarea)[aria-invalid="true"]:focus,
+.inlineRow input[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 3px #c2363626;
+}
+
+.field .fieldError,
+.fieldError {
+  display: block;
+  margin: 4px 0 0;
+  color: #a82b2b;
+  font-size: 15px;
+}
+
+.pointsControl {
+  position: relative;
+}
+
+.pointsControl input[type="number"] {
+  appearance: textfield;
+  padding-right: 48px;
+}
+
+.pointsControl input::-webkit-inner-spin-button,
+.pointsControl input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.pointsArrows {
+  position: absolute;
+  inset: 1px 1px 1px auto;
+  display: grid;
+  width: 40px;
+}
+
+.pointsArrows button {
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border-radius: 8px;
+  color: var(--primary);
+  font-size: 16px;
+  line-height: 1;
+}
+
+.pointsArrows button:hover:not(:disabled) {
+  background: #f3eeff;
+}
+
+.pointsArrows button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+@media (max-width: 560px) {
+  .generationRow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

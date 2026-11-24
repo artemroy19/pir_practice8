@@ -1,0 +1,154 @@
+name: repit
+x-service: &service
+  build: ./backend
+  restart: unless-stopped
+  depends_on:
+    postgres:
+      condition: service_healthy
+  healthcheck:
+    test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=2)"]
+    interval: 4s
+    timeout: 3s
+    retries: 15
+x-api-env: &api-env
+  SECRET_KEY: ${SECRET_KEY:-repit-local-only-change-this-secret-key}
+  INTERNAL_KEY: ${INTERNAL_KEY:-repit-local-internal}
+x-worker-env: &worker-env
+  <<: *api-env
+  BROKER_URL: amqp://repit:${BROKER_PASSWORD:-repit_rabbit_local}@rabbitmq:5672/%2F
+
+services:
+  gateway:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${REPIT_PORT:-8080}:80"
+    volumes:
+      - ./infra/gateway.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      frontend:
+        condition: service_healthy
+      identity-service:
+        condition: service_healthy
+      groups-service:
+        condition: service_healthy
+      catalog-service:
+        condition: service_healthy
+      attempts-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/health/live"]
+      interval: 5s
+      timeout: 3s
+      retries: 8
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: /api
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/"]
+      interval: 5s
+      timeout: 3s
+      retries: 8
+  identity-service:
+    <<: *service
+    command: ["uvicorn", "repit.services.identity:app", "--host", "0.0.0.0", "--port", "8000", "--no-access-log"]
+    environment:
+      <<: *api-env
+      SERVICE: identity
+      DATABASE_URL: postgresql://identity_app:${IDENTITY_DB_PASSWORD:-identity_local}@postgres/identity_db
+      MEDIA_DIR: /app/media
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-25}
+      SMTP_FROM: ${SMTP_FROM:-noreply@repit.local}
+      PUBLIC_URL: ${PUBLIC_URL:-http://localhost:8080}
+    volumes:
+      - media:/app/media
+  groups-service:
+    <<: *service
+    command: ["uvicorn", "repit.services.groups:app", "--host", "0.0.0.0", "--port", "8000", "--no-access-log"]
+    environment:
+      <<: *api-env
+      SERVICE: groups
+      DATABASE_URL: postgresql://groups_app:${GROUPS_DB_PASSWORD:-groups_local}@postgres/groups_db
+  catalog-service:
+    <<: *service
+    command: ["uvicorn", "repit.services.catalog:app", "--host", "0.0.0.0", "--port", "8000", "--no-access-log"]
+    environment:
+      <<: *api-env
+      SERVICE: catalog
+      AI_API_KEY: ${AI_API_KEY:-}
+      AI_RESPONSE_FORMAT: ${AI_RESPONSE_FORMAT:-json_object}
+      AI_MODEL: "${AI_MODEL:-google/gemma-4-26b-a4b-it:free}"
+      AI_BASE_URL: ${AI_BASE_URL:-https://openrouter.ai/api/v1}
+      DATABASE_URL: postgresql://catalog_app:${CATALOG_DB_PASSWORD:-catalog_local}@postgres/catalog_db
+  attempts-service:
+    <<: *service
+    command: ["uvicorn", "repit.services.attempts:app", "--host", "0.0.0.0", "--port", "8000", "--no-access-log"]
+    environment:
+      <<: *api-env
+      SERVICE: attempts
+      DATABASE_URL: postgresql://attempts_app:${ATTEMPTS_DB_PASSWORD:-attempts_local}@postgres/attempts_db
+  attempt-publisher:
+    <<: *service
+    healthcheck:
+      disable: true
+    command: ["python", "-m", "repit.broker", "publish"]
+    environment:
+      <<: *worker-env
+      SERVICE: attempt-publisher
+      DATABASE_URL: postgresql://attempts_app:${ATTEMPTS_DB_PASSWORD:-attempts_local}@postgres/attempts_db
+    depends_on:
+      attempts-service:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+  catalog-consumer:
+    <<: *service
+    healthcheck:
+      disable: true
+    command: ["python", "-m", "repit.broker", "consume"]
+    environment:
+      <<: *worker-env
+      SERVICE: catalog-consumer
+      DATABASE_URL: postgresql://catalog_app:${CATALOG_DB_PASSWORD:-catalog_local}@postgres/catalog_db
+    depends_on:
+      catalog-service:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres_local}
+      IDENTITY_DB_PASSWORD: ${IDENTITY_DB_PASSWORD:-identity_local}
+      GROUPS_DB_PASSWORD: ${GROUPS_DB_PASSWORD:-groups_local}
+      CATALOG_DB_PASSWORD: ${CATALOG_DB_PASSWORD:-catalog_local}
+      ATTEMPTS_DB_PASSWORD: ${ATTEMPTS_DB_PASSWORD:-attempts_local}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/databases.sh:/docker-entrypoint-initdb.d/01-databases.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres"]
+      interval: 4s
+      timeout: 3s
+      retries: 18
+  rabbitmq:
+    hostname: repit-broker
+    image: rabbitmq:4.1-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: repit
+      RABBITMQ_DEFAULT_PASS: ${BROKER_PASSWORD:-repit_rabbit_local}
+    volumes:
+      - rabbit_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 18
+
+volumes:
+  media:
+  postgres_data:
+  rabbit_data:
